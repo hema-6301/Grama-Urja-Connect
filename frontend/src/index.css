@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Custom font or global tweaks */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb; /* Tailwind's gray-50 */
+  color: #1f2937; /* Tailwind's gray-800 */
+}
+
+/* Optional: Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optional: Custom link styling */
+a {
+  transition: color 0.2s ease;
+}
+a:hover {
+  color: #059669; /* Tailwind's green-600 */
+}
