@@ -23,7 +23,7 @@ const BillUpload = () => {
     setMsg("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/ocr/extract", {
+      const res = await fetch("https://grama-urja-connect.onrender.com/api/ocr/extract", {
         method: "POST",
         body: formData,
       });
@@ -54,7 +54,7 @@ const BillUpload = () => {
     setMsg("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/estimate", {
+      const res = await fetch("https://grama-urja-connect.onrender.com/api/estimate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ units }),
@@ -83,7 +83,7 @@ const BillUpload = () => {
     setMsg("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/bills/add", {
+      const res = await fetch("https://grama-urja-connect.onrender.com/api/bills/add", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
