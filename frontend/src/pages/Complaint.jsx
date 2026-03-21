@@ -24,7 +24,7 @@ const Complaint = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/complaints/raise", {
+      const res = await fetch("https://grama-urja-connect.onrender.com/api/complaints/raise", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
