@@ -1,3 +1,4 @@
+// frontend/src/pages/BillUpload.jsx
 import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +13,8 @@ const BillUpload = () => {
   const [loading, setLoading] = useState(false);
   const textRef = useRef(null);
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   const handleOCR = async (e) => {
     e.preventDefault();
     if (!file) return setMsg(t("selectFileFirst"));
@@ -23,11 +26,10 @@ const BillUpload = () => {
     setMsg("");
 
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/ocr/extract", {
+      const res = await fetch(`${API_BASE}/api/ocr/extract`, {
         method: "POST",
         body: formData,
       });
-
       const data = await res.json();
       if (res.ok) {
         setText(data.raw || t("ocrDone"));
@@ -40,8 +42,9 @@ const BillUpload = () => {
       } else {
         setMsg(data.error || t("ocrFailed"));
       }
-    } catch {
-      setMsg(t("ocrServerError"));
+    } catch (err) {
+      console.error("OCR fetch error:", err);
+      setMsg(t("ocrServerError") || "Server error during OCR");
     } finally {
       setLoading(false);
     }
@@ -54,7 +57,7 @@ const BillUpload = () => {
     setMsg("");
 
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/estimate", {
+      const res = await fetch(`${API_BASE}/api/estimate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ units }),
@@ -62,12 +65,15 @@ const BillUpload = () => {
       const data = await res.json();
       if (res.ok) {
         setAmount(data.estimatedAmount.toFixed(2));
-        setMsg(t("estimatedBill", { amount: data.estimatedAmount.toFixed(2) }));
+        setMsg(
+          t("estimatedBill", { amount: data.estimatedAmount.toFixed(2) })
+        );
       } else {
         setMsg(data.error || t("estimateFailed"));
       }
-    } catch {
-      setMsg(t("estimateServerError"));
+    } catch (err) {
+      console.error("Estimate fetch error:", err);
+      setMsg(t("estimateServerError") || "Server error during estimate");
     } finally {
       setLoading(false);
     }
@@ -83,7 +89,7 @@ const BillUpload = () => {
     setMsg("");
 
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/bills/add", {
+      const res = await fetch(`${API_BASE}/api/bills/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -108,8 +114,9 @@ const BillUpload = () => {
       } else {
         setMsg(data.error || t("uploadFailed"));
       }
-    } catch {
-      setMsg(t("saveServerError"));
+    } catch (err) {
+      console.error("Save bill error:", err);
+      setMsg(t("saveServerError") || "Server error during save");
     } finally {
       setLoading(false);
     }
@@ -118,9 +125,7 @@ const BillUpload = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 p-8 max-w-2xl mx-auto w-full">
-        <h2 className="text-2xl font-bold text-teal-700 mb-6">
-          {t("uploadTitle")}
-        </h2>
+        <h2 className="text-2xl font-bold text-teal-700 mb-6">{t("uploadTitle")}</h2>
 
         {/* OCR Upload Section */}
         <form onSubmit={handleOCR} className="space-y-4 mb-8">
@@ -142,12 +147,8 @@ const BillUpload = () => {
         {text && (
           <div ref={textRef} className="scroll-mt-24">
             <div className="mb-8 mt-4 bg-gray-100 p-4 rounded-lg shadow max-h-64 overflow-y-auto">
-              <h3 className="font-semibold text-teal-700 mb-2">
-                {t("extractedText")}
-              </h3>
-              <pre className="text-gray-700 whitespace-pre-wrap text-sm">
-                {text}
-              </pre>
+              <h3 className="font-semibold text-teal-700 mb-2">{t("extractedText")}</h3>
+              <pre className="text-gray-700 whitespace-pre-wrap text-sm">{text}</pre>
             </div>
           </div>
         )}
@@ -202,9 +203,7 @@ const BillUpload = () => {
         {msg && (
           <p
             className={`mt-4 font-semibold ${
-              msg.includes("✅") || msg.includes("💡")
-                ? "text-teal-700"
-                : "text-red-600"
+              msg.includes("✅") || msg.includes("💡") ? "text-teal-700" : "text-red-600"
             }`}
           >
             {msg}
