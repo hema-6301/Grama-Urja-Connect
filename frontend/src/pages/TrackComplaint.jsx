@@ -4,7 +4,7 @@ import { Ticket, Clock, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
-const API_BASE = import.meta.env.VITE_API_URL1 || "https://grama-urja-connect.onrender.com";
+const API_BASE = import.meta.env.VITE_API_URL || "https://grama-urja-connect.onrender.com";
 
 const StatusBadge = ({ status }) => {
   const map = {
