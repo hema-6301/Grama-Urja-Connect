@@ -23,7 +23,7 @@ const Profile = () => {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/user/me", {
+        const res = await fetch("https://grama-urja-connect.onrender.com/api/user/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -56,7 +56,7 @@ const Profile = () => {
 
   const handleUpdate = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/user/update", {
+      const res = await fetch("https://grama-urja-connect.onrender.com/api/user/update", {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -77,7 +77,7 @@ const Profile = () => {
 
   const handlePasswordChange = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/user/change-password", {
+      const res = await fetch("https://grama-urja-connect.onrender.com/api/user/change-password", {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(passwords),
