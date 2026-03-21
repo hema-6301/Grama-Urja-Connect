@@ -14,22 +14,23 @@ const Login = ({ setUser }) => {
     e.preventDefault();
     setError(""); // reset error on new submit
     try {
-      // Use your deployed Render backend URL from environment variable
-      const res = await fetch(import.meta.env.VITE_API_URL + "/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      // Call your Render backend login route
+      const res = await fetch(
+        import.meta.env.VITE_API_URL + "/api/auth/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       const data = await res.json();
 
       if (res.ok) {
-        // Save token & user
         localStorage.setItem("token", data.token);
         setUser(data.user);
         navigate("/dashboard");
       } else {
-        // Show backend error or default message
         setError(data.message || t("loginFailed"));
       }
     } catch (err) {
