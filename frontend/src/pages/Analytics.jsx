@@ -9,7 +9,7 @@ const Analytics = () => {
   const [error, setError] = useState("");
   const { t } = useTranslation();
 
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const API_BASE = import.meta.env.VITE_API_URL || "https://grama-urja-connect.onrender.com;
 
   useEffect(() => {
     const fetchStats = async () => {
