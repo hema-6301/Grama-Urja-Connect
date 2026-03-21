@@ -6,19 +6,18 @@ import { useTranslation } from "react-i18next";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
+// Normalized status badge
 const StatusBadge = ({ status }) => {
   const map = {
-    Pending: { text: "Pending", classes: "bg-amber-100 text-amber-800" },
-    "In Progress": { text: "In Progress", classes: "bg-yellow-100 text-yellow-800" },
-    Resolved: { text: "Resolved", classes: "bg-green-100 text-green-800" },
-    Rejected: { text: "Rejected", classes: "bg-red-100 text-red-800" },
-    open: { text: "Pending", classes: "bg-amber-100 text-amber-800" },
+    pending: { text: "Pending", classes: "bg-amber-100 text-amber-800" },
     "in-progress": { text: "In Progress", classes: "bg-yellow-100 text-yellow-800" },
     resolved: { text: "Resolved", classes: "bg-green-100 text-green-800" },
+    rejected: { text: "Rejected", classes: "bg-red-100 text-red-800" },
     closed: { text: "Closed", classes: "bg-gray-100 text-gray-700" },
   };
 
-  const s = map[status] || { text: status || "Unknown", classes: "bg-gray-100 text-gray-800" };
+  const key = (status || "").toLowerCase();
+  const s = map[key] || { text: status || "Unknown", classes: "bg-gray-100 text-gray-800" };
   return (
     <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold ${s.classes}`}>
       {s.text}
@@ -36,26 +35,23 @@ const TrackComplaint = () => {
   const inputRef = useRef(null);
   const navigate = useNavigate();
 
+  // Focus input and fetch recent complaints
   useEffect(() => {
     inputRef.current?.focus();
-
     const token = localStorage.getItem("token");
     if (token) {
-      fetch(`${API_BASE}/api/complaints/my`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      fetch(`${API_BASE}/api/complaints/my`, { headers: { Authorization: `Bearer ${token}` } })
         .then((r) => r.json())
         .then((data) => {
-          if (data && Array.isArray(data)) setRecent(data.slice(0, 6));
+          if (Array.isArray(data)) setRecent(data.slice(0, 6));
         })
         .catch(() => {});
     }
   }, []);
 
   const formatDate = (iso) => {
-    if (!iso) return "";
     try {
-      return new Date(iso).toLocaleString();
+      return iso ? new Date(iso).toLocaleString() : "";
     } catch {
       return iso;
     }
@@ -78,7 +74,6 @@ const TrackComplaint = () => {
 
       if (res.ok) {
         setComplaint(data);
-        setMessage("");
       } else {
         setMessage(data.error || t("complaintNotFound"));
       }
@@ -97,6 +92,7 @@ const TrackComplaint = () => {
         <p className="text-gray-600 mt-2">{t("enterTicketHint")}</p>
       </div>
 
+      {/* Ticket Input Form */}
       <form onSubmit={handleTrack} className="flex gap-3 items-center mb-6">
         <input
           ref={inputRef}
@@ -112,14 +108,12 @@ const TrackComplaint = () => {
           disabled={loading}
           className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition"
         >
-          {loading ? t("tracking") : t("trackBtn")}
+          {loading ? t("tracking") + "..." : t("trackBtn")}
         </button>
       </form>
 
       {message && (
-        <div className="mb-6 text-center">
-          <p className="text-sm text-red-600">{message}</p>
-        </div>
+        <div className="mb-6 text-center text-sm text-red-600">{message}</div>
       )}
 
       <AnimatePresence>
@@ -150,7 +144,7 @@ const TrackComplaint = () => {
                 </p>
 
                 <div className="mt-4 flex items-center gap-3">
-                  <StatusBadge status={complaint.status || complaint.state || "Pending"} />
+                  <StatusBadge status={complaint.status || complaint.state} />
                   <span className="text-gray-500 text-sm">
                     {t("submittedOn")}: {formatDate(complaint.createdAt)}
                   </span>
@@ -158,9 +152,9 @@ const TrackComplaint = () => {
               </div>
 
               <div className="text-right">
-                {complaint.status === "Resolved" || complaint.status === "resolved" ? (
+                {["resolved"].includes((complaint.status || "").toLowerCase()) ? (
                   <CheckCircle className="w-8 h-8 text-green-500" />
-                ) : complaint.status === "Rejected" || complaint.status === "rejected" ? (
+                ) : ["rejected"].includes((complaint.status || "").toLowerCase()) ? (
                   <XCircle className="w-8 h-8 text-red-500" />
                 ) : (
                   <Clock className="w-8 h-8 text-amber-500" />
@@ -168,7 +162,7 @@ const TrackComplaint = () => {
               </div>
             </div>
 
-            {complaint.updates && Array.isArray(complaint.updates) && complaint.updates.length > 0 && (
+            {complaint.updates?.length > 0 ? (
               <div className="mt-6">
                 <h4 className="font-semibold text-gray-800 mb-2">{t("updates")}</h4>
                 <ul className="space-y-2">
@@ -180,6 +174,8 @@ const TrackComplaint = () => {
                   ))}
                 </ul>
               </div>
+            ) : (
+              <p className="text-gray-500 text-sm mt-2">{t("noUpdatesYet")}</p>
             )}
 
             <div className="mt-6 flex gap-3">
@@ -201,7 +197,7 @@ const TrackComplaint = () => {
         )}
       </AnimatePresence>
 
-      {recent && recent.length > 0 && (
+      {recent?.length > 0 && (
         <div className="mt-8">
           <h4 className="text-lg font-semibold text-gray-800 mb-3">{t("recentComplaints")}</h4>
           <div className="grid gap-3">
@@ -211,16 +207,15 @@ const TrackComplaint = () => {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25 }}
-                className="p-4 border rounded bg-white flex justify-between items-start"
+                className="p-4 border rounded bg-white flex justify-between items-start cursor-pointer hover:shadow-md transition"
+                onClick={() => { setTicketNumber(c.ticketNumber); handleTrack(); }}
               >
                 <div>
                   <div className="text-sm text-gray-500">{formatDate(c.createdAt)}</div>
                   <div className="font-semibold">{c.title}</div>
                   <div className="text-sm text-gray-700 mt-1">{c.ticketNumber}</div>
                 </div>
-                <div>
-                  <StatusBadge status={c.status || "Pending"} />
-                </div>
+                <StatusBadge status={c.status || "Pending"} />
               </motion.div>
             ))}
           </div>
