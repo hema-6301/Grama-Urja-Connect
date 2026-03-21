@@ -12,22 +12,28 @@ const Login = ({ setUser }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // reset error on new submit
     try {
+      // Use your deployed Render backend URL from environment variable
       const res = await fetch(import.meta.env.VITE_API_URL + "/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
+
       const data = await res.json();
+
       if (res.ok) {
+        // Save token & user
         localStorage.setItem("token", data.token);
         setUser(data.user);
         navigate("/dashboard");
       } else {
+        // Show backend error or default message
         setError(data.message || t("loginFailed"));
       }
     } catch (err) {
-      setError(t("serverError"));
+      setError(t("serverError") || "Unable to connect to server");
     }
   };
 
@@ -83,7 +89,6 @@ const Login = ({ setUser }) => {
             required
           />
 
-          {/* Forgot Password Link */}
           <div className="text-right text-sm">
             <Link
               to="/forgot-password"
@@ -101,7 +106,6 @@ const Login = ({ setUser }) => {
           </button>
         </motion.form>
 
-        {/* Don't have an account section */}
         <motion.div
           className="text-center mt-6"
           initial={{ opacity: 0 }}
