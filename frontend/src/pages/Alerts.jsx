@@ -9,25 +9,30 @@ const Alerts = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMsg(""); // Reset previous message
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/alerts/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: email,
-          subject: t("alerts1.subject"),
-          message: t("alerts1.message"),
-        }),
-      });
+      const res = await fetch(
+        import.meta.env.VITE_API_URL + "/api/alerts/send",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: email,
+            subject: t("alerts1.subject"),
+            message: t("alerts1.message"),
+          }),
+        }
+      );
 
       const data = await res.json();
       if (res.ok) {
-        setMsg(t("alerts1.success"));
+        setMsg(t("alerts1.success")); // Success message
       } else {
-        setMsg(data.error || t("alerts.fail"));
+        setMsg(data.error || t("alerts.fail")); // Backend error
       }
-    } catch {
-      setMsg(t("alerts1.serverError"));
+    } catch (err) {
+      console.error("Alert API error:", err);
+      setMsg(t("alerts1.serverError") || "Server error. Please try again.");
     }
   };
 
@@ -37,10 +42,11 @@ const Alerts = () => {
         <h2 className="text-3xl font-bold text-green-700 mb-6 text-center">
           📩 {t("alerts1.title")}
         </h2>
+
         {msg && (
           <p
             className={`mb-3 text-center font-medium ${
-              msg.includes("✅") || msg.includes("success")
+              msg.includes("✅") || msg.toLowerCase().includes("success")
                 ? "text-green-600"
                 : "text-red-600"
             }`}
@@ -48,6 +54,7 @@ const Alerts = () => {
             {msg}
           </p>
         )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
