@@ -1,3 +1,4 @@
+// frontend/src/pages/Complaint.jsx
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,12 +11,13 @@ const Complaint = () => {
   const [description, setDescription] = useState("");
   const [msg, setMsg] = useState("");
 
+  const API_BASE = import.meta.env.VITE_API_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const token = localStorage.getItem("token");
 
-    // 🔒 Block submission if token is missing or invalid
     if (!token || token === "null" || token === "undefined" || token.trim() === "") {
       setMsg("⚠️ " + t("loginRequired"));
       // Optional: redirect to login page
@@ -24,7 +26,7 @@ const Complaint = () => {
     }
 
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/complaints/raise", {
+      const res = await fetch(`${API_BASE}/api/complaints/raise`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,6 +36,7 @@ const Complaint = () => {
       });
 
       const data = await res.json();
+
       if (res.ok) {
         setMsg(`✅ ${t("complaintSuccess")} ${data.ticketNumber}`);
         setTitle("");
@@ -41,7 +44,8 @@ const Complaint = () => {
       } else {
         setMsg(data.error || `❌ ${t("complaintFail")}`);
       }
-    } catch {
+    } catch (err) {
+      console.error("Complaint submit error:", err);
       setMsg(`❌ ${t("serverError")}`);
     }
   };
@@ -49,9 +53,7 @@ const Complaint = () => {
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#fdfbfb] to-[#bfa2db] px-6 py-12 pb-32 flex items-center justify-center relative">
       <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-8">
-        <h2 className="text-3xl font-bold text-teal-700 mb-6 text-center">
-          {t("raiseComplaint")}
-        </h2>
+        <h2 className="text-3xl font-bold text-teal-700 mb-6 text-center">{t("raiseComplaint")}</h2>
 
         {msg && (
           <motion.div
@@ -92,7 +94,7 @@ const Complaint = () => {
 
       {/* Floating Track Button */}
       <Link
-         to="/track-complaint"
+        to="/track-complaint"
         className="fixed bottom-6 right-6 bg-teal-600 text-white px-4 py-2 rounded-full shadow-lg hover:bg-teal-700 transition"
       >
         {t("trackComplaint")}
@@ -100,7 +102,5 @@ const Complaint = () => {
     </div>
   );
 };
-
-
 
 export default Complaint;
