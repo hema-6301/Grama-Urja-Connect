@@ -1,3 +1,4 @@
+// frontend/src/pages/Register.jsx
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -8,41 +9,41 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({ text: "", type: "" }); // type: "success" | "error"
   const navigate = useNavigate();
+
+  const API_BASE = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!name.trim() || !email.trim() || !password.trim()) {
-      setMessage(t("allFieldsRequired") || "All fields are required.");
+      setMessage({ text: t("allFieldsRequired") || "All fields are required.", type: "error" });
       return;
     }
 
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/auth/register", {
+      const res = await fetch(`${API_BASE}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
       });
 
-      let data;
+      let data = {};
       try {
         data = await res.json();
-      } catch {
-        data = {};
-      }
+      } catch {}
 
       if (res.ok) {
-        setMessage(t("registerSuccess"));
+        setMessage({ text: t("registerSuccess") || "Account created successfully!", type: "success" });
         setTimeout(() => navigate("/login"), 2000);
       } else {
         console.error("Backend error response:", data);
-        setMessage(data.message || t("registerFailed"));
+        setMessage({ text: data.message || t("registerFailed") || "Registration failed.", type: "error" });
       }
     } catch (err) {
       console.error("Fetch error:", err);
-      setMessage(t("serverError") + " (check console for details)");
+      setMessage({ text: t("serverError") + " (check console)" || "Server error.", type: "error" });
     }
   };
 
@@ -63,14 +64,16 @@ const Register = () => {
           {t("createAccount")}
         </motion.h2>
 
-        {message && (
+        {message.text && (
           <motion.p
-            className="text-center text-sm mb-3 text-gray-700"
+            className={`text-center text-sm mb-3 ${
+              message.type === "success" ? "text-green-700" : "text-red-600"
+            }`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
           >
-            {message}
+            {message.text}
           </motion.p>
         )}
 
@@ -83,7 +86,7 @@ const Register = () => {
         >
           <input
             type="text"
-            placeholder={t("name")}
+            placeholder={t("name") || "Name"}
             className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-teal-400"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -91,7 +94,7 @@ const Register = () => {
           />
           <input
             type="email"
-            placeholder={t("email")}
+            placeholder={t("email") || "Email"}
             className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-teal-400"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -99,7 +102,7 @@ const Register = () => {
           />
           <input
             type="password"
-            placeholder={t("password")}
+            placeholder={t("password") || "Password"}
             className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-teal-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -109,7 +112,7 @@ const Register = () => {
             type="submit"
             className="w-full bg-teal-600 text-white py-3 rounded-lg hover:bg-teal-700 transition"
           >
-            {t("register")}
+            {t("register") || "Register"}
           </button>
         </motion.form>
 
