@@ -1,3 +1,4 @@
+// frontend/src/pages/Dashboard.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -63,7 +64,7 @@ const Dashboard = ({ user }) => {
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#f4ebd0] to-[#bfa2db] px-6 py-12 flex flex-col items-center">
-      <h2 className="text-3xl font-bold text-teal-700 mb-4">
+      <h2 className="text-3xl font-bold text-teal-700 mb-4 text-center">
         {t("dashboardWelcome")}
         {user?.name ? `, ${user.name}` : ""} 👋
       </h2>
@@ -82,9 +83,12 @@ const Dashboard = ({ user }) => {
             whileTap="tap"
             className={`rounded-2xl shadow-md p-6 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 hover:shadow-xl hover:ring-2 ${card.theme} ${card.extra || ""}`}
           >
-            <Link to={card.link} className="flex flex-col items-center gap-2">
+            <Link
+              to={card.link}
+              className="flex flex-col items-center gap-2 w-full h-full text-center"
+            >
               <div>{card.icon}</div>
-              <h3 className="text-lg font-semibold text-center">{card.title}</h3>
+              <h3 className="text-lg font-semibold">{card.title}</h3>
             </Link>
           </motion.div>
         ))}
