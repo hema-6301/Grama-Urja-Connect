@@ -1,3 +1,4 @@
+// frontend/src/pages/Profile.jsx
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -10,10 +11,10 @@ const Profile = () => {
   const [passwords, setPasswords] = useState({ current: "", new: "" });
   const [showPassword, setShowPassword] = useState(false);
 
+  const API_BASE = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("token");
 
-  // Capitalize first letter helper
-  const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+  const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : "");
 
   useEffect(() => {
     if (!token) {
@@ -23,7 +24,7 @@ const Profile = () => {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch("https://grama-urja-connect.onrender.com/api/user/me", {
+        const res = await fetch(`${API_BASE}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -31,20 +32,22 @@ const Profile = () => {
           setUser(data);
           setEditData((prev) => ({
             ...prev,
-            name: prev.name || capitalize(data.name),
-            phone: prev.phone || data.phone || "",
-            language: prev.language || data.language || "en",
-            gender: prev.gender || capitalize(data.gender),
+            name: capitalize(data.name),
+            phone: data.phone || "",
+            language: data.language || "en",
+            gender: capitalize(data.gender),
           }));
         } else {
           setMsg("❌ " + data.error);
         }
-      } catch {
+      } catch (err) {
+        console.error("Profile fetch error:", err);
         setMsg("❌ " + t("serverError"));
       }
     };
+
     fetchUser();
-  }, [token, t]);
+  }, [API_BASE, token, t]);
 
   const getInitials = (name) => {
     if (!name) return "U";
@@ -56,7 +59,7 @@ const Profile = () => {
 
   const handleUpdate = async () => {
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/user/update", {
+      const res = await fetch(`${API_BASE}/api/user/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -66,25 +69,25 @@ const Profile = () => {
         }),
       });
       const data = await res.json();
-      setMsg(data.ok ? "✅ Profile updated successfully" : "❌ " + data.error);
-      if (data.ok) {
-        setUser({ ...user, ...editData });
-      }
-    } catch {
+      setMsg(data.ok ? "✅ " + t("profileUpdated") : "❌ " + data.error);
+      if (data.ok) setUser({ ...user, ...editData });
+    } catch (err) {
+      console.error("Profile update error:", err);
       setMsg("❌ " + t("serverError"));
     }
   };
 
   const handlePasswordChange = async () => {
     try {
-      const res = await fetch("https://grama-urja-connect.onrender.com/api/user/change-password", {
+      const res = await fetch(`${API_BASE}/api/user/change-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify(passwords),
       });
       const data = await res.json();
-      setMsg(data.ok ? "✅ Password changed" : "❌ " + data.error);
-    } catch {
+      setMsg(data.ok ? "✅ " + t("passwordChanged") : "❌ " + data.error);
+    } catch (err) {
+      console.error("Password change error:", err);
       setMsg("❌ " + t("serverError"));
     }
   };
@@ -104,7 +107,11 @@ const Profile = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
-            className="p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-center"
+            className={`p-3 rounded-lg border text-center ${
+              msg.startsWith("✅")
+                ? "bg-green-50 border-green-300 text-green-700"
+                : "bg-red-50 border-red-300 text-red-700"
+            }`}
           >
             {msg}
           </motion.div>
@@ -178,7 +185,7 @@ const Profile = () => {
                 onClick={handleUpdate}
                 className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition"
               >
-                {t("Update Profile")}
+                {t("updateProfile")}
               </button>
 
               {/* Password Section */}
